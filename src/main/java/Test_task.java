@@ -39,8 +39,6 @@ public class DocumentManager {
         return document;
     }
 
-
-
     /**
      * Implementation this method should find documents which match with request
      *
