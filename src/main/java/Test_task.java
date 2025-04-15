@@ -47,9 +47,9 @@ public class DocumentManager {
      */
     public List<Document> search(SearchRequest request) {
         return dataStore.values().stream()
-                .filter(doc -> doc.getCreated().isAfter(request.getCreatedFrom()))
-                .filter(doc -> doc.getCreated().isBefore(request.getCreatedTo()))
-                .filter(doc -> request.getAuthorIds().contains(doc.getAuthor().getId()))
+                .filter(doc ->
+                        isBetween(doc, request.getCreatedFrom(), request.getCreatedFrom()))
+                .filter(doc -> containsAuthor(doc, request.getAuthorIds()))
                 .filter(doc -> containsPrefix(doc, request.getTitlePrefixes()))
                 .filter(doc -> containsContent(doc, request.getContainsContents()))
                 // Unmodifiable list is returned
@@ -69,15 +69,29 @@ public class DocumentManager {
 
     private boolean containsPrefix(Document doc, List<String> prefixes) {
         String title = doc.getTitle();
-        return prefixes.stream()
+        return anyNull(prefixes) || prefixes.stream()
                 .anyMatch(title::startsWith);
     }
 
     // Only documents containing at least one content string are matched
     private boolean containsContent(Document doc, List<String> contents) {
         String content = doc.getContent();
-        return contents.stream()
+        return anyNull(contents) || contents.stream()
                 .anyMatch(content::contains);
+    }
+
+    private boolean isBetween(Document document, Instant from, Instant to) {
+        Instant created = document.getCreated();
+        return anyNull(from, to) || created.isAfter(from) && created.isBefore(to);
+    }
+
+    private boolean containsAuthor(Document doc, List<String> authorIds) {
+        return anyNull(authorIds) || authorIds.contains(doc.getAuthor().getId());
+    }
+
+    private boolean anyNull(Object... args) {
+        return Arrays.stream(args)
+                .anyMatch(Objects::isNull);
     }
 
 
