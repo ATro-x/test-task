@@ -68,30 +68,37 @@ public class DocumentManager {
 
 
     private boolean containsPrefix(Document doc, List<String> prefixes) {
+        if (prefixes == null)
+            return true;
+
         String title = doc.getTitle();
-        return anyNull(prefixes) || prefixes.stream()
+        return prefixes.stream()
                 .anyMatch(title::startsWith);
     }
 
     // Only documents containing at least one content string are matched
     private boolean containsContent(Document doc, List<String> contents) {
+        if (contents == null)
+            return true;
+
         String content = doc.getContent();
-        return anyNull(contents) || contents.stream()
+        return contents.stream()
                 .anyMatch(content::contains);
     }
 
     private boolean isBetween(Document document, Instant from, Instant to) {
         Instant created = document.getCreated();
-        return anyNull(from, to) || created.isAfter(from) && created.isBefore(to);
+
+        boolean createdBefore = from == null || created.isAfter(from);
+        boolean createdAfter = to == null || created.isBefore(to);
+        return createdBefore && createdAfter;
     }
 
     private boolean containsAuthor(Document doc, List<String> authorIds) {
-        return anyNull(authorIds) || authorIds.contains(doc.getAuthor().getId());
-    }
+        if (authorIds == null)
+            return true;
 
-    private boolean anyNull(Object... args) {
-        return Arrays.stream(args)
-                .anyMatch(Objects::isNull);
+        return authorIds.contains(doc.getAuthor().getId());
     }
 
 
