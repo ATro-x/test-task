@@ -48,7 +48,7 @@ public class DocumentManager {
     public List<Document> search(SearchRequest request) {
         return dataStore.values().stream()
                 .filter(doc ->
-                        isBetween(doc, request.getCreatedFrom(), request.getCreatedFrom()))
+                        isBetween(doc, request.getCreatedFrom(), request.getCreatedTo()))
                 .filter(doc -> containsAuthor(doc, request.getAuthorIds()))
                 .filter(doc -> containsPrefix(doc, request.getTitlePrefixes()))
                 .filter(doc -> containsContent(doc, request.getContainsContents()))
@@ -89,8 +89,8 @@ public class DocumentManager {
     private boolean isBetween(Document document, Instant from, Instant to) {
         Instant created = document.getCreated();
 
-        boolean createdBefore = from == null || created.isAfter(from);
-        boolean createdAfter = to == null || created.isBefore(to);
+        boolean createdAfter = from == null || created.isAfter(from);
+        boolean createdBefore = to == null || created.isBefore(to);
         return createdBefore && createdAfter;
     }
 
